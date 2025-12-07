@@ -1,0 +1,19 @@
+{
+  "name": "wcag-mcp",
+  "version": "1.0.0",
+  "description": "WCAG MCP server for agentic systems",
+  "type": "module",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node src/index.js",
+    "prebuild": "git submodule update --init --recursive",
+    "update-wcag": "git submodule update --remote data/wcag-as-json"
+  }
+}
