@@ -90,6 +90,7 @@ Once deployed, configure your Claude Desktop MCP settings to use the remote serv
 {
   "mcpServers": {
     "wcag-mcp": {
+      "type": "stdio",
       "command": "npx",
       "args": ["mcp-remote@next", "https://your-site.netlify.app/mcp"]
     }
