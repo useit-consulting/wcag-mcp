@@ -1,26 +1,21 @@
 #!/usr/bin/env node
 /**
- * Fetches WCAG data from W3C and copies ACT rules from the submodule.
+ * Fetches WCAG data from W3C.
  * 
  * Usage:
  *   node scripts/fetch-wcag-data.js
  * 
- * This script:
- * 1. Fetches wcag.json from W3C's published WCAG 2.2 JSON
- * 2. Copies act-mapping.json from the w3c/wcag submodule
+ * This script fetches wcag.json from W3C's published WCAG 2.2 JSON
  */
 
-import { writeFile, copyFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
+import { writeFile, mkdir } from 'fs/promises';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = join(__dirname, '..', 'data');
-const SUBMODULE_DIR = join(DATA_DIR, 'wcag');
 
 const WCAG_JSON_URL = 'https://www.w3.org/WAI/WCAG22/wcag.json';
-const ACT_RULES_SOURCE = join(SUBMODULE_DIR, 'guidelines', 'act-mapping.json');
 
 async function fetchWcagJson() {
   console.log('Fetching WCAG 2.2 JSON from W3C...');
@@ -49,28 +44,6 @@ async function fetchWcagJson() {
   console.log(`  → ${termCount} glossary terms`);
 }
 
-async function copyActRules() {
-  console.log('\nCopying ACT rules from submodule...');
-  
-  if (!existsSync(ACT_RULES_SOURCE)) {
-    console.error(`✗ ACT rules source not found: ${ACT_RULES_SOURCE}`);
-    console.error('  Make sure the w3c/wcag submodule is initialized:');
-    console.error('  git submodule update --init --recursive');
-    process.exit(1);
-  }
-  
-  const outputPath = join(DATA_DIR, 'act-rules.json');
-  await copyFile(ACT_RULES_SOURCE, outputPath);
-  
-  // Read and report stats
-  const actData = await import(outputPath, { with: { type: 'json' } });
-  const rules = actData.default['act-rules'] || [];
-  const activeRules = rules.filter(r => !r.deprecated);
-  
-  console.log(`✓ Saved act-rules.json`);
-  console.log(`  → ${rules.length} total rules (${activeRules.length} active, ${rules.length - activeRules.length} deprecated)`);
-}
-
 async function main() {
   console.log('='.repeat(50));
   console.log('WCAG MCP Data Build');
@@ -79,7 +52,6 @@ async function main() {
   
   try {
     await fetchWcagJson();
-    await copyActRules();
     
     console.log('\n' + '='.repeat(50));
     console.log('✓ Data build complete!');

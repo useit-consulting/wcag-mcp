@@ -1,6 +1,6 @@
 /**
  * Data helpers for WCAG MCP server
- * Provides utility functions for accessing and querying WCAG and ACT data
+ * Provides utility functions for accessing and querying WCAG data
  */
 
 import { createRequire } from 'module';
@@ -12,12 +12,10 @@ const require = createRequire(import.meta.url);
 
 // Load data files
 const wcagData = require(join(__dirname, '..', 'data', 'wcag.json'));
-const actRulesData = require(join(__dirname, '..', 'data', 'act-rules.json'));
 
 // Export raw data for direct access
 export const principles = wcagData.principles;
 export const terms = wcagData.terms;
-export const actRules = actRulesData['act-rules'];
 
 /**
  * Strip HTML tags from a string
@@ -235,47 +233,6 @@ export function searchTerms(query) {
   return terms.filter(t => 
     t.name.toLowerCase().includes(searchQuery) ||
     stripHtml(t.definition).toLowerCase().includes(searchQuery)
-  );
-}
-
-/**
- * Get ACT rules for a specific success criterion (by slug ID)
- */
-export function getActRulesForCriterion(scId) {
-  return actRules.filter(rule => 
-    !rule.deprecated && rule.successCriteria.includes(scId)
-  );
-}
-
-/**
- * Get ACT rules for a specific technique (by ID)
- */
-export function getActRulesForTechnique(techniqueId) {
-  return actRules.filter(rule => 
-    !rule.deprecated && rule.wcagTechniques.includes(techniqueId)
-  );
-}
-
-/**
- * Find an ACT rule by ID
- */
-export function findActRule(ruleId) {
-  return actRules.find(rule => 
-    rule.frontmatter?.id === ruleId || 
-    rule.permalink.includes(ruleId)
-  );
-}
-
-/**
- * Search ACT rules by keyword
- */
-export function searchActRules(query) {
-  const searchQuery = query.toLowerCase();
-  return actRules.filter(rule => 
-    !rule.deprecated && (
-      rule.title.toLowerCase().includes(searchQuery) ||
-      (rule.frontmatter?.description || '').toLowerCase().includes(searchQuery)
-    )
   );
 }
 

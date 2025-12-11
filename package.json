@@ -4,7 +4,8 @@
   "description": "WCAG MCP server for agentic systems - powered by official W3C data",
   "type": "module",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.4"
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "jsdom": "^25.0.1"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -13,8 +14,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node src/index.js",
-    "build:data": "node scripts/fetch-wcag-data.js",
-    "update:data": "git submodule update --remote data/wcag && npm run build:data",
-    "postinstall": "git submodule update --init --recursive && npm run build:data"
+    "build": "node scripts/build.js",
+    "postinstall": "npm run build"
   }
 }

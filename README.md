@@ -1,16 +1,55 @@
 # wcag-mcp
 
-**WCAG MCP Server for Agentic Systems** - Powered by Official W3C Data
+**WCAG MCP Server for Agentic Systems** - Powered by Official W3C Data with Full Understanding Documentation
 
-A Model Context Protocol (MCP) server providing comprehensive access to WCAG 2.2 guidelines, techniques, glossary terms, and ACT test rules. Works both locally (stdio) and remotely (Netlify Functions).
+# wcag-mcp
+
+**WCAG MCP Server for Agentic Systems** - Powered by Official W3C Data with Full Understanding Documentation
+
+A Model Context Protocol (MCP) server providing comprehensive access to WCAG 2.2 guidelines, techniques, glossary terms, and **complete Understanding documentation** for every success criterion. Works both locally (stdio) and remotely (Netlify Functions).
 
 ## Features
 
 - **Complete WCAG 2.2 Coverage** - All 87 success criteria with full details
+- **Full Understanding Documentation** - Intent, benefits, examples, and resources for every SC
+- **Techniques Library** - 400+ techniques (sufficient, advisory, failure patterns)
+- **Glossary** - 101 official WCAG term definitions
+- **Version Tracking** - See what's new in WCAG 2.2
+
+## What's New: Understanding Documentation
+
+This server now includes **complete Understanding documentation** parsed from the official W3C WCAG Understanding documents. For every success criterion, you get:
+
+- **Brief Summary** - Goal, what to do, and why it's important
+- **Intent** - Detailed explanation of the purpose and rationale
+- **Benefits** - Who benefits and how
+- **Examples** - Real-world examples of implementation
+- **Resources** - Curated list of tools and references
+
+No more following external links - everything you need is right in the MCP response!
+
+## Available Tools (19 total)
+
+## Features
+
+- **Complete WCAG 2.2 Coverage** - All 87 success criteria with full details
+- **Full Understanding Documentation** - Intent, benefits, examples, and resources for every SC
 - **Techniques Library** - 400+ techniques (sufficient, advisory, failure patterns)
 - **ACT Test Rules** - 87+ standardized accessibility test rules
 - **Glossary** - 101 official WCAG term definitions
 - **Version Tracking** - See what's new in WCAG 2.2
+
+## What's New: Understanding Documentation
+
+This server now includes **complete Understanding documentation** parsed from the official W3C WCAG Understanding documents. For every success criterion, you get:
+
+- **Brief Summary** - Goal, what to do, and why it's important
+- **Intent** - Detailed explanation of the purpose and rationale
+- **Benefits** - Who benefits and how
+- **Examples** - Real-world examples of implementation
+- **Resources** - Curated list of tools and references
+
+No more following external links - everything you need is right in the MCP response!
 
 ## Available Tools (23 total)
 
@@ -45,21 +84,12 @@ A Model Context Protocol (MCP) server providing comprehensive access to WCAG 2.2
 | `list-glossary-terms` | Lists all 101 WCAG glossary terms |
 | `search-glossary` | Searches the glossary by keyword |
 
-### ACT Test Rules Tools
-
-| Tool | Description |
-|------|-------------|
-| `list-test-rules` | Lists all ACT (Accessibility Conformance Testing) test rules |
-| `get-test-rule` | Gets details for a specific test rule by ID |
-| `get-test-rules-for-criterion` | Gets all test rules for a specific success criterion |
-| `search-test-rules` | Searches test rules by keyword |
-
 ### Enhanced Context Tools
 
 | Tool | Description |
 |------|-------------|
 | `whats-new-in-wcag22` | Lists all 9 success criteria added in WCAG 2.2 |
-| `get-full-criterion-context` | Gets comprehensive context: SC + techniques + test rules |
+| `get-full-criterion-context` | Gets comprehensive context: SC + techniques |
 | `get-server-info` | Returns server information and statistics |
 
 ## Data Source
@@ -67,7 +97,7 @@ A Model Context Protocol (MCP) server providing comprehensive access to WCAG 2.2
 This server uses official data from the [W3C WCAG Repository](https://github.com/w3c/wcag):
 
 - **WCAG JSON**: [Published WCAG 2.2 JSON](https://www.w3.org/WAI/WCAG22/wcag.json)
-- **ACT Rules**: From `guidelines/act-mapping.json` in the W3C repo
+- **Understanding Docs**: Parsed from official W3C Understanding HTML files in the submodule
 
 ### Statistics
 
@@ -76,7 +106,6 @@ This server uses official data from the [W3C WCAG Repository](https://github.com
 - **87 Success Criteria** - Levels A (32), AA (24), AAA (31)
 - **400+ Techniques** - HTML, ARIA, CSS, PDF, General, and more
 - **101 Glossary Terms** - Official WCAG definitions
-- **87+ ACT Test Rules** - Standardized conformance tests
 
 ## Installation
 
@@ -85,21 +114,25 @@ This server uses official data from the [W3C WCAG Repository](https://github.com
 git clone --recurse-submodules https://github.com/joe-watkins/wcag-mcp.git
 cd wcag-mcp
 
-# Install dependencies (automatically fetches WCAG data)
+# Install dependencies and build data (automatically fetches WCAG data and Understanding docs)
 npm install
 ```
 
 ### Updating WCAG Data
 
-To pull the latest WCAG data:
+To pull the latest WCAG data and Understanding documentation:
 
 ```bash
-# Fetch latest data from W3C
-npm run build:data
-
-# Or update submodule and fetch data
-npm run update:data
+# Update submodule, fetch latest data from W3C, and parse Understanding docs
+npm run build
 ```
+
+The build process:
+1. Updates the W3C WCAG git submodule to the latest version
+2. Fetches the latest WCAG 2.2 JSON data from W3C
+3. Parses all Understanding documentation from HTML files
+
+This runs automatically during `npm install`.
 
 ### Configure your IDE
 
@@ -149,14 +182,18 @@ Replace `your-site.netlify.app` with your actual Netlify URL.
 ```
 wcag-mcp/
 ├── data/
-│   ├── wcag/                    # W3C WCAG submodule
-│   ├── wcag.json                # Fetched WCAG 2.2 data (generated)
-│   └── act-rules.json           # ACT test rules (generated)
+│   ├── wcag/                    # W3C WCAG submodule (includes Understanding docs)
+│   │   └── understanding/       # Understanding HTML files by WCAG version
+│   │       ├── 20/              # WCAG 2.0 Understanding docs
+│   │       ├── 21/              # WCAG 2.1 Understanding docs
+│   │       └── 22/              # WCAG 2.2 Understanding docs
+│   └── wcag.json                # Enhanced WCAG data with Understanding content
 ├── scripts/
-│   └── fetch-wcag-data.js       # Data build script
+│   ├── fetch-wcag-data.js       # Fetch WCAG JSON from W3C
+│   └── parse-understanding-docs.js  # Parse Understanding HTML files
 ├── src/
 │   ├── index.js                 # MCP server with stdio transport
-│   ├── tools.js                 # Tool definitions (23 tools)
+│   ├── tools.js                 # Tool definitions (19 tools)
 │   └── data-helpers.js          # Data access utilities
 ├── netlify/
 │   └── functions/api.js         # Netlify Function handler
@@ -181,4 +218,3 @@ MIT
 - [W3C WCAG Repository](https://github.com/w3c/wcag)
 - [Understanding WCAG 2.2](https://www.w3.org/WAI/WCAG22/Understanding/)
 - [Techniques for WCAG 2.2](https://www.w3.org/WAI/WCAG22/Techniques/)
-- [ACT Rules](https://www.w3.org/WAI/standards-guidelines/act/rules/)

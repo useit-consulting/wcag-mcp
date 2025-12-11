@@ -6,7 +6,6 @@
 import {
   principles,
   terms,
-  actRules,
   stripHtml,
   getScUrl,
   getUnderstandingUrl,
@@ -21,10 +20,6 @@ import {
   getTechniquesForCriterion,
   findTerm,
   searchTerms,
-  getActRulesForCriterion,
-  getActRulesForTechnique,
-  findActRule,
-  searchActRules,
   getNewInVersion,
   textResponse
 } from './data-helpers.js';
@@ -160,6 +155,22 @@ const getCriterion = {
     output += `**Principle:** ${principle.num} ${principle.handle}\n`;
     output += `**Guideline:** ${guideline.num} ${guideline.handle}\n`;
     output += `**WCAG Versions:** ${sc.versions.join(', ')}\n\n`;
+    
+    // Add Understanding brief if available
+    if (sc.understanding?.brief) {
+      output += `## In Brief\n\n`;
+      if (sc.understanding.brief.goal) {
+        output += `**Goal:** ${sc.understanding.brief.goal}\n`;
+      }
+      if (sc.understanding.brief['what to do']) {
+        output += `**What to do:** ${sc.understanding.brief['what to do']}\n`;
+      }
+      if (sc.understanding.brief["why it's important"]) {
+        output += `**Why it's important:** ${sc.understanding.brief["why it's important"]}\n`;
+      }
+      output += '\n';
+    }
+    
     output += `## Description\n\n${sc.title}\n\n`;
     
     // Add details (exceptions, notes, etc.)
@@ -181,6 +192,37 @@ const getCriterion = {
           output += `${detail.text}\n\n`;
         }
       }
+    }
+    
+    // Add Understanding intent
+    if (sc.understanding?.intent) {
+      output += `## Intent\n\n${sc.understanding.intent}\n\n`;
+    }
+    
+    // Add Understanding benefits
+    if (sc.understanding?.benefits) {
+      output += `## Benefits\n\n`;
+      for (const benefit of sc.understanding.benefits) {
+        output += `- ${benefit}\n`;
+      }
+      output += '\n';
+    }
+    
+    // Add Understanding examples
+    if (sc.understanding?.examples && sc.understanding.examples.length > 0) {
+      output += `## Examples\n\n`;
+      for (let i = 0; i < sc.understanding.examples.length; i++) {
+        output += `### Example ${i + 1}\n\n${sc.understanding.examples[i]}\n\n`;
+      }
+    }
+    
+    // Add Understanding resources
+    if (sc.understanding?.resources && sc.understanding.resources.length > 0) {
+      output += `## Resources\n\n`;
+      for (const resource of sc.understanding.resources) {
+        output += `- [${resource.title}](${resource.url})\n`;
+      }
+      output += '\n';
     }
 
     output += `## Links\n\n`;
@@ -719,172 +761,7 @@ const searchGlossary = {
 };
 
 // ============================================================================
-// ACT TEST RULES TOOLS (New)
-// ============================================================================
-
-const listTestRules = {
-  name: 'list-test-rules',
-  description: 'Lists ACT (Accessibility Conformance Testing) test rules, optionally filtered by success criterion.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      sc_id: {
-        type: 'string',
-        description: 'Filter by success criterion slug ID (e.g., "non-text-content", "focus-visible")'
-      },
-      include_deprecated: {
-        type: 'boolean',
-        description: 'Include deprecated rules (default: false)'
-      }
-    },
-    required: []
-  },
-  handler: async () => {
-    const activeRules = actRules.filter(r => !r.deprecated);
-    
-    let output = `# ACT Test Rules (${activeRules.length} active rules)\n\n`;
-    output += `These are standardized test rules for WCAG conformance testing.\n\n`;
-
-    activeRules.sort((a, b) => a.title.localeCompare(b.title)).forEach(rule => {
-      const scList = rule.successCriteria.slice(0, 3).join(', ');
-      const more = rule.successCriteria.length > 3 ? ` (+${rule.successCriteria.length - 3} more)` : '';
-      output += `- **${rule.title}** (${rule.frontmatter?.id || 'N/A'})\n  SC: ${scList}${more}\n`;
-    });
-
-    return textResponse(output);
-  }
-};
-
-const getTestRule = {
-  name: 'get-test-rule',
-  description: 'Gets details for a specific ACT test rule by ID.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      id: {
-        type: 'string',
-        description: 'Test rule ID (e.g., "5f99a7", "73f2c2")'
-      }
-    },
-    required: ['id']
-  },
-  handler: async (args) => {
-    const rule = findActRule(args.id);
-    
-    if (!rule) {
-      return textResponse(`No test rule found with ID "${args.id}".`);
-    }
-
-    const fm = rule.frontmatter || {};
-    
-    let output = `# ${rule.title}\n\n`;
-    output += `**ID:** ${fm.id || 'N/A'}\n`;
-    output += `**Rule Type:** ${fm.rule_type || 'N/A'}\n`;
-    if (rule.deprecated) {
-      output += `**Status:** DEPRECATED\n`;
-    }
-    output += `\n## Description\n\n${fm.description || 'No description available.'}\n`;
-    
-    output += `\n## Related Success Criteria\n\n`;
-    rule.successCriteria.forEach(scId => {
-      const result = findSuccessCriterionById(scId);
-      if (result) {
-        output += `- **${result.sc.num}** ${result.sc.handle}\n`;
-      } else {
-        output += `- ${scId}\n`;
-      }
-    });
-
-    if (rule.wcagTechniques.length > 0) {
-      output += `\n## Related Techniques\n\n`;
-      rule.wcagTechniques.forEach(techId => {
-        output += `- ${techId}\n`;
-      });
-    }
-
-    output += `\n## Links\n\n`;
-    output += `- [Full Rule Documentation](https://www.w3.org/WAI${rule.permalink})\n`;
-
-    return textResponse(output);
-  }
-};
-
-const getTestRulesForCriterion = {
-  name: 'get-test-rules-for-criterion',
-  description: 'Gets all ACT test rules for a specific success criterion.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      ref_id: {
-        type: 'string',
-        description: 'Success criterion reference number (e.g., "1.1.1", "2.4.7")'
-      }
-    },
-    required: ['ref_id']
-  },
-  handler: async (args) => {
-    const result = findSuccessCriterion(args.ref_id);
-    
-    if (!result) {
-      return textResponse(`No success criterion found with number "${args.ref_id}".`);
-    }
-
-    const { sc } = result;
-    const rules = getActRulesForCriterion(sc.id);
-
-    if (rules.length === 0) {
-      return textResponse(`No ACT test rules found for ${sc.num} ${sc.handle}.`);
-    }
-
-    let output = `# ACT Test Rules for ${sc.num} ${sc.handle}\n\n`;
-    output += `These rules provide standardized tests for this success criterion:\n\n`;
-
-    rules.forEach(rule => {
-      const fm = rule.frontmatter || {};
-      output += `## ${rule.title}\n`;
-      output += `**ID:** ${fm.id}\n`;
-      output += `**Type:** ${fm.rule_type}\n`;
-      if (fm.description) {
-        output += `${fm.description}\n`;
-      }
-      output += `[View Rule](https://www.w3.org/WAI${rule.permalink})\n\n`;
-    });
-
-    return textResponse(output);
-  }
-};
-
-const searchTestRules = {
-  name: 'search-test-rules',
-  description: 'Searches ACT test rules by keyword.',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      query: {
-        type: 'string',
-        description: 'Search query'
-      }
-    },
-    required: ['query']
-  },
-  handler: async (args) => {
-    const matches = searchActRules(args.query);
-
-    if (matches.length === 0) {
-      return textResponse(`No test rules found matching "${args.query}".`);
-    }
-
-    const output = matches.map(rule => {
-      const fm = rule.frontmatter || {};
-      return `**${rule.title}** (${fm.id})\n${(fm.description || '').substring(0, 100)}...`;
-    }).join('\n\n---\n\n');
-
-    return textResponse(`# Test Rule Search Results for "${args.query}" (${matches.length} found)\n\n${output}`);
-  }
-};
-
-// ============================================================================
-// ENHANCED CONTEXT TOOLS (New)
+// ENHANCED CONTEXT TOOLS
 // ============================================================================
 
 const whatsNewInWcag22 = {
@@ -981,18 +858,6 @@ const getFullCriterionContext = {
     output += `- **Advisory:** ${advisoryCount} techniques\n`;
     output += `- **Failure:** ${failureCount} techniques\n\n`;
 
-    // ACT Rules
-    const rules = getActRulesForCriterion(sc.id);
-    output += `## ACT Test Rules (${rules.length})\n\n`;
-    if (rules.length > 0) {
-      rules.forEach(rule => {
-        output += `- **${rule.title}** (${rule.frontmatter?.id})\n`;
-      });
-    } else {
-      output += `No automated test rules available for this criterion.\n`;
-    }
-    output += '\n';
-
     // Links
     output += `## Links\n\n`;
     output += `- [WCAG Specification](${getScUrl(sc)})\n`;
@@ -1016,22 +881,21 @@ const getServerInfo = {
     const allTechniques = getAllTechniques();
     const levelCounts = { A: 0, AA: 0, AAA: 0 };
     allCriteria.forEach(sc => levelCounts[sc.level]++);
-    const activeRules = actRules.filter(r => !r.deprecated);
 
     return textResponse(
       `**WCAG MCP Server** v2.0.0\n\n` +
-      `A Model Context Protocol server providing comprehensive access to WCAG 2.2 guidelines, techniques, and testing resources.\n\n` +
+      `A Model Context Protocol server providing comprehensive access to WCAG 2.2 guidelines with full Understanding documentation.\n\n` +
       `## Data Source\n\n` +
       `- **Source:** [W3C WCAG Repository](https://github.com/w3c/wcag)\n` +
       `- **WCAG JSON:** [Published WCAG 2.2 JSON](https://www.w3.org/WAI/WCAG22/wcag.json)\n` +
+      `- **Understanding Docs:** Parsed from official W3C Understanding HTML files\n` +
       `- **WCAG Version:** 2.2\n\n` +
       `## Statistics\n\n` +
       `- **Principles:** ${principles.length}\n` +
       `- **Guidelines:** ${principles.reduce((sum, p) => sum + p.guidelines.length, 0)}\n` +
       `- **Success Criteria:** ${allCriteria.length} (Level A: ${levelCounts.A}, AA: ${levelCounts.AA}, AAA: ${levelCounts.AAA})\n` +
       `- **Techniques:** ${allTechniques.length}\n` +
-      `- **Glossary Terms:** ${terms.length}\n` +
-      `- **ACT Test Rules:** ${activeRules.length}\n\n` +
+      `- **Glossary Terms:** ${terms.length}\n\n` +
       `## Attribution\n\n` +
       `WCAG data from the [W3C WCAG Repository](https://github.com/w3c/wcag) ([W3C Document License](https://www.w3.org/copyright/document-license/)).\n\n` +
       `This software includes material copied from or derived from Web Content Accessibility Guidelines (WCAG) 2.2. ` +
@@ -1066,12 +930,6 @@ export const tools = [
   getGlossaryTerm,
   listGlossaryTerms,
   searchGlossary,
-  
-  // ACT test rules tools
-  listTestRules,
-  getTestRule,
-  getTestRulesForCriterion,
-  searchTestRules,
   
   // Enhanced context tools
   whatsNewInWcag22,
