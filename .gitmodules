@@ -1,3 +1,3 @@
-[submodule "data/wcag-as-json"]
-	path = data/wcag-as-json
-	url = https://github.com/tenon-io/wcag-as-json.git
+[submodule "data/wcag"]
+	path = data/wcag
+	url = https://github.com/w3c/wcag.git
