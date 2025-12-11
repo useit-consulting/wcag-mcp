@@ -47,7 +47,7 @@ This server now includes **complete Understanding documentation** parsed from th
 
 No more following external links - everything you need is right in the MCP response!
 
-## Available Tools (23 total)
+## Available Tools (20 total)
 
 ### Core WCAG Tools
 
@@ -56,7 +56,8 @@ No more following external links - everything you need is right in the MCP respo
 | `list-principles` | Lists all four WCAG 2.2 principles (Perceivable, Operable, Understandable, Robust) |
 | `list-guidelines` | Lists WCAG 2.2 guidelines, optionally filtered by principle number (1-4) |
 | `list-success-criteria` | Lists success criteria with optional filters by level (A/AA/AAA), guideline, or principle |
-| `get-criterion` | Gets full details for a specific success criterion by number (e.g., "1.1.1", "2.4.7") |
+| `get-success-criteria-detail` | Gets just the normative success criterion text and exceptions without Understanding docs |
+| `get-criterion` | Gets comprehensive details including full Understanding documentation (intent, benefits, examples) |
 | `get-guideline` | Gets full details for a specific guideline including all its success criteria |
 | `search-wcag` | Searches success criteria by keyword in titles and descriptions |
 | `get-criteria-by-level` | Gets all criteria for a conformance level, optionally including lower levels |
