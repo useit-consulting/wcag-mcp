@@ -13,7 +13,7 @@ async function handleJsonRpcRequest(request) {
       result = {
         protocolVersion: '2024-11-05',
         capabilities: { tools: {} },
-        serverInfo: { name: 'wcag-mcp', version: '1.0.0' }
+        serverInfo: { name: 'wcag-mcp', version: '2.0.0' }
       };
     } else if (method === 'tools/list') {
       result = {
@@ -103,7 +103,7 @@ export const handler = async (event, context) => {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       name: 'wcag-mcp',
-      version: '1.0.0',
+      version: '2.0.0',
       status: 'healthy',
       protocol: 'MCP JSON-RPC 2.0',
       tools: tools.length

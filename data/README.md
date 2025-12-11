@@ -1,29 +1,36 @@
 # Data Directory
 
-This folder contains the WCAG data source for the MCP server.
+This folder contains the WCAG data sources for the MCP server.
 
-## wcag-as-json (Git Submodule)
+## Data Files
 
-The `wcag-as-json/` directory is a git submodule pointing to [tenon-io/wcag-as-json](https://github.com/tenon-io/wcag-as-json).
+- **`wcag.json`** - WCAG 2.2 principles, guidelines, success criteria, techniques, and glossary (fetched from W3C)
+- **`act-rules.json`** - ACT (Accessibility Conformance Testing) test rules (copied from submodule)
 
-It contains WCAG 2.2 guidelines and success criteria in JSON format (`wcag.json`).
+## wcag (Git Submodule)
+
+The `wcag/` directory is a git submodule pointing to [w3c/wcag](https://github.com/w3c/wcag), the official W3C WCAG repository.
 
 ### Updating the Data
 
-To pull the latest data from the upstream repository:
+To fetch the latest data:
 
 ```bash
-npm run update-wcag
+npm run build:data
 ```
 
-Or manually:
+This will:
+1. Fetch the published `wcag.json` from W3C
+2. Copy the ACT rules mapping from the submodule
+
+To also update the submodule to the latest commit:
 
 ```bash
-git submodule update --remote data/wcag-as-json
+npm run update:data
 ```
 
 ### Attribution
 
-WCAG data from [wcag-as-json](https://github.com/tenon-io/wcag-as-json) (MIT License).
+WCAG data from the [W3C WCAG Repository](https://github.com/w3c/wcag) ([W3C Document License](https://www.w3.org/copyright/document-license/)).
 
 > This software includes material copied from or derived from Web Content Accessibility Guidelines (WCAG) 2.2 https://www.w3.org/TR/WCAG22/. Copyright © 2023 W3C® (MIT, ERCIM, Keio, Beihang).
