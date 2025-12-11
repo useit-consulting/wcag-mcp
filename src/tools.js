@@ -128,9 +128,69 @@ const listSuccessCriteria = {
   }
 };
 
+const getSuccessCriteriaDetail = {
+  name: 'get-success-criteria-detail',
+  description: 'Gets the normative success criterion requirements - just the title and exception details without Understanding documentation.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      ref_id: {
+        type: 'string',
+        description: 'Success criterion reference number (e.g., "1.1.1", "2.4.7")'
+      }
+    },
+    required: ['ref_id']
+  },
+  handler: async (args) => {
+    const result = findSuccessCriterion(args.ref_id);
+    
+    if (!result) {
+      return textResponse(`No success criterion found with number "${args.ref_id}". Use format like "1.1.1" or "2.4.7".`);
+    }
+
+    const { principle, guideline, sc } = result;
+    
+    let output = `# ${sc.num} ${sc.handle}\n\n`;
+    output += `**Level:** ${sc.level}\n`;
+    output += `**Principle:** ${principle.num} ${principle.handle}\n`;
+    output += `**Guideline:** ${guideline.num} ${guideline.handle}\n`;
+    output += `**WCAG Versions:** ${sc.versions.join(', ')}\n\n`;
+    
+    output += `## Success Criterion\n\n${sc.title}\n\n`;
+    
+    // Add details (exceptions, notes, etc.)
+    if (sc.details && sc.details.length > 0) {
+      output += `## Details\n\n`;
+      for (const detail of sc.details) {
+        if (detail.type === 'ulist' && detail.items) {
+          for (const item of detail.items) {
+            if (item.handle) {
+              output += `- **${item.handle}:** ${item.text}\n`;
+            } else {
+              output += `- ${item.text}\n`;
+            }
+          }
+          output += '\n';
+        } else if (detail.type === 'note') {
+          output += `> **${detail.handle}:** ${detail.text}\n\n`;
+        } else if (detail.type === 'p') {
+          output += `${detail.text}\n\n`;
+        }
+      }
+    }
+
+    output += `## Links\n\n`;
+    output += `- [WCAG Specification](${getScUrl(sc)})\n`;
+    output += `- [Understanding ${sc.num}](${getUnderstandingUrl(sc)})\n`;
+    output += `- [How to Meet ${sc.num}](${getQuickRefUrl(sc)})\n`;
+
+    return textResponse(output);
+  }
+};
+
 const getCriterion = {
   name: 'get-criterion',
-  description: 'Gets full details for a specific WCAG success criterion by its reference number (e.g., "1.1.1", "2.4.7", "4.1.2").',
+  description: 'Gets full details for a specific WCAG success criterion by its reference number (e.g., "1.1.1", "2.4.7", "4.1.2"), including complete Understanding documentation.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -913,6 +973,7 @@ export const tools = [
   listPrinciples,
   listGuidelines,
   listSuccessCriteria,
+  getSuccessCriteriaDetail,
   getCriterion,
   getGuideline,
   searchWcag,
