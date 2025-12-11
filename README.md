@@ -24,7 +24,7 @@ This server now includes **complete Understanding documentation** parsed from th
 
 No more following external links - everything you need is right in the MCP response!
 
-## Available Tools (19 total)
+## Available Tools (20 total)
 
 ## Features
 
@@ -190,7 +190,7 @@ wcag-mcp/
 │   └── parse-understanding-docs.js  # Parse Understanding HTML files
 ├── src/
 │   ├── index.js                 # MCP server with stdio transport
-│   ├── tools.js                 # Tool definitions (19 tools)
+│   ├── tools.js                 # Tool definitions (20 tools)
 │   └── data-helpers.js          # Data access utilities
 ├── netlify/
 │   └── functions/api.js         # Netlify Function handler
