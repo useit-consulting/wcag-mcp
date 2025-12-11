@@ -1,0 +1,92 @@
+name: Manual WCAG Update
+
+on:
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force update even if no changes detected'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  manual-update:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Update and rebuild
+        run: |
+          echo "Updating WCAG submodule..."
+          cd data/wcag
+          git checkout main
+          git pull origin main
+          cd ../..
+          
+          echo "Rebuilding WCAG data..."
+          npm run build
+          
+      - name: Check for changes
+        id: git-check
+        run: |
+          if git diff --exit-code data/wcag.json; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "ℹ️ No changes detected in wcag.json"
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "✅ Changes detected in wcag.json"
+          fi
+          
+      - name: Create Pull Request
+        if: steps.git-check.outputs.changes == 'true' || inputs.force
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: 'chore: manual update of WCAG data'
+          title: '🔄 Manual WCAG Data Update'
+          body: |
+            ## Manual WCAG Data Update
+            
+            This PR was manually triggered to update WCAG data.
+            
+            ### Changes
+            - Updated `data/wcag` submodule to latest commit
+            - Rebuilt `data/wcag.json` with latest data
+            - Parsed latest Understanding documentation
+            
+            ${{ inputs.force && '**Note:** This was a forced update.' || '' }}
+            
+            ### What to Review
+            - Check that the data looks correct
+            - Verify any new success criteria are properly parsed
+            - Ensure Understanding documentation is complete
+            
+            ---
+            
+            **This PR was manually triggered via GitHub Actions.**
+          branch: manual-update-wcag-data
+          delete-branch: true
+          labels: |
+            manual
+            data-update
+          
+      - name: Summary
+        run: |
+          if [ "${{ steps.git-check.outputs.changes }}" == "true" ] || [ "${{ inputs.force }}" == "true" ]; then
+            echo "✅ Created PR with updated WCAG data"
+          else
+            echo "ℹ️ No changes detected and force=false, skipping PR creation"
+          fi
