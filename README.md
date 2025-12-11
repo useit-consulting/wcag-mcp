@@ -2,10 +2,6 @@
 
 **WCAG MCP Server for Agentic Systems** - Powered by Official W3C Data with Full Understanding Documentation
 
-# wcag-mcp
-
-**WCAG MCP Server for Agentic Systems** - Powered by Official W3C Data with Full Understanding Documentation
-
 A Model Context Protocol (MCP) server providing comprehensive access to WCAG 2.2 guidelines, techniques, glossary terms, and **complete Understanding documentation** for every success criterion. Works both locally (stdio) and remotely (Netlify Functions).
 
 ## Features
