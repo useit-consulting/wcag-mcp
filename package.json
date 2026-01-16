@@ -1,20 +1,46 @@
 {
   "name": "wcag-mcp",
   "version": "2.0.0",
+  "mcpName": "io.github.joe-watkins/wcag",
   "description": "WCAG MCP server for agentic systems - powered by official W3C data",
   "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "wcag-mcp": "src/index.js"
+  },
+  "files": [
+    "src/",
+    "data/wcag.json",
+    "README.md"
+  ],
+  "keywords": [
+    "mcp",
+    "accessibility",
+    "a11y",
+    "wcag",
+    "w3c",
+    "guidelines"
+  ],
+  "author": "Joe Watkins",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joe-watkins/wcag-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/joe-watkins/wcag-mcp/issues"
+  },
+  "homepage": "https://github.com/joe-watkins/wcag-mcp#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
     "jsdom": "^25.0.1"
   },
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
     "dev": "node src/index.js",
-    "build": "node scripts/build.js",
-    "postinstall": "npm run build"
+    "build": "node scripts/build.js"
   }
 }

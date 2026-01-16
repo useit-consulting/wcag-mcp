@@ -4,6 +4,23 @@
 
 A Model Context Protocol (MCP) server providing comprehensive access to WCAG 2.2 guidelines, techniques, glossary terms, and **complete Understanding documentation** for every success criterion. Works both locally (stdio) and remotely (Netlify Functions).
 
+## Quick Start
+
+Add to your MCP client configuration:
+
+```json
+{
+  "mcpServers": {
+    "wcag": {
+      "command": "npx",
+      "args": ["-y", "wcag-mcp"]
+    }
+  }
+}
+```
+
+That's it! No cloning, no building - just add the config and start querying WCAG.
+
 ## Features
 
 - **Complete WCAG 2.2 Coverage** - All 87 success criteria with full details
