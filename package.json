@@ -1,12 +1,12 @@
 {
-  "name": "wcag-mcp",
+  "name": "wcag-guidelines-mcp",
   "version": "2.0.0",
-  "mcpName": "io.github.joe-watkins/wcag",
+  "mcpName": "io.github.joe-watkins/wcag-guidelines",
   "description": "WCAG MCP server for agentic systems - powered by official W3C data",
   "type": "module",
   "main": "src/index.js",
   "bin": {
-    "wcag-mcp": "src/index.js"
+    "wcag-guidelines-mcp": "src/index.js"
   },
   "files": [
     "src/",

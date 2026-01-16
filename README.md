@@ -13,7 +13,7 @@ Add to your MCP client configuration:
   "mcpServers": {
     "wcag": {
       "command": "npx",
-      "args": ["-y", "wcag-mcp"]
+      "args": ["-y", "wcag-guidelines-mcp"]
     }
   }
 }
