@@ -191,6 +191,19 @@ Once deployed, configure your Claude Desktop MCP settings to use the remote serv
 
 Replace `your-site.netlify.app` with your actual Netlify URL.
 
+## Custom GPT (OpenAPI bridge)
+
+The same deployment exposes a REST/OpenAPI bridge so you can use WCAG MCP tools from a [Custom GPT](https://help.openai.com/en/articles/8554397-creating-a-gpt) in ChatGPT.
+
+- **Base URL:** `https://<your-site>.netlify.app/bridge`
+- **OpenAPI spec:** `https://<your-site>.netlify.app/bridge/openapi.json` — use this URL (or paste the JSON) when configuring the Custom GPT’s **Actions**.
+- **Auth:** Set `BRIDGE_API_KEY` in Netlify (Site settings → Environment variables). In the Custom GPT Action configuration, choose **API Key** and either:
+  - **Bearer:** set the same value as the API key (ChatGPT will send `Authorization: Bearer <key>`), or
+  - **Custom header:** name `x-api-key`, value = your `BRIDGE_API_KEY`.
+- If `BRIDGE_API_KEY` is not set, the bridge allows unauthenticated access (useful for local/testing only; set the key for production).
+
+Each WCAG MCP tool is exposed as `POST /bridge/tools/<tool-name>` with a JSON body (same parameters as the MCP tool). The bridge forwards requests to the MCP backend and returns `{ "content": "<text>" }`.
+
 ## Project Structure
 
 ```
@@ -210,7 +223,9 @@ wcag-mcp/
 │   ├── tools.js                 # Tool definitions (20 tools)
 │   └── data-helpers.js          # Data access utilities
 ├── netlify/
-│   └── functions/api.js         # Netlify Function handler
+│   └── functions/
+│       ├── api.js         # MCP JSON-RPC handler
+│       └── bridge.js      # OpenAPI REST bridge for Custom GPT
 └── package.json
 ```
 

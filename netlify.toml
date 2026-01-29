@@ -11,3 +11,8 @@
   from = "/mcp/*"
   to = "/.netlify/functions/api/:splat"
   status = 200
+
+[[redirects]]
+  from = "/bridge/*"
+  to = "/.netlify/functions/bridge/:splat"
+  status = 200
