@@ -12,13 +12,11 @@
  */
 
 import { execSync } from 'child_process';
-import { existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const rootDir = join(__dirname, '..');
-const submoduleDir = join(rootDir, 'data', 'wcag');
 
 function run(command, description) {
   console.log(`\n${description}...`);
@@ -37,18 +35,17 @@ async function main() {
   console.log('='.repeat(60));
   
   try {
-    // Step 1: Update WCAG submodule
-    if (existsSync(submoduleDir)) {
-      run(
-        'git submodule update --remote data/wcag',
-        'Updating WCAG submodule to latest'
-      );
-    } else {
-      run(
-        'git submodule update --init --recursive',
-        'Initializing WCAG submodule'
-      );
-    }
+    // Step 1: Ensure WCAG submodule is initialized and populated.
+    // When cloning without --recursive, data/wcag can exist but be empty, so we
+    // always run --init first; then update to latest with --remote.
+    run(
+      'git submodule update --init --recursive',
+      'Initializing WCAG submodule'
+    );
+    run(
+      'git submodule update --remote data/wcag',
+      'Updating WCAG submodule to latest'
+    );
     
     // Step 2: Fetch WCAG JSON from W3C
     run(
