@@ -3,15 +3,7 @@
  * Provides utility functions for accessing and querying WCAG data
  */
 
-import { createRequire } from 'module';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const require = createRequire(import.meta.url);
-
-// Load data files
-const wcagData = require(join(__dirname, '..', 'data', 'wcag.json'));
+import wcagData from '../data/wcag.json' with { type: 'json' };
 
 // Export raw data for direct access
 export const principles = wcagData.principles;
