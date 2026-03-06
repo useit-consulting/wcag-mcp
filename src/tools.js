@@ -130,7 +130,7 @@ const listSuccessCriteria = {
 
 const getSuccessCriteriaDetail = {
   name: 'get-success-criteria-detail',
-  description: 'Gets the normative success criterion requirements - just the title and exception details without Understanding documentation.',
+  description: 'Gets just the normative W3C WCAG success criterion title, level, and exception details — without Understanding documentation. Use get-criterion for the full text including intent, benefits, and examples.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -190,7 +190,7 @@ const getSuccessCriteriaDetail = {
 
 const getCriterion = {
   name: 'get-criterion',
-  description: 'Gets full details for a specific WCAG success criterion by its reference number (e.g., "1.1.1", "2.4.7", "4.1.2"), including complete Understanding documentation.',
+  description: 'Gets the official W3C WCAG 2.2 normative text and Understanding documentation for a success criterion by reference number (e.g., "1.1.1", "2.4.7"). Returns the standard itself — for practical testing requirements, use get-useit-criteria-by-wcag; for Swedish DIGG testing methods, use get-digg-by-wcag.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -333,7 +333,7 @@ const getGuideline = {
 
 const searchWcag = {
   name: 'search-wcag',
-  description: 'Searches WCAG 2.2 success criteria by keyword in titles and descriptions.',
+  description: 'Searches official WCAG 2.2 success criteria by keyword in titles and descriptions. Returns matching W3C success criteria. For searching practical testing requirements, use search-useit-criteria instead.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -860,7 +860,7 @@ const whatsNewInWcag22 = {
 
 const getFullCriterionContext = {
   name: 'get-full-criterion-context',
-  description: 'Gets comprehensive context for a success criterion including techniques, test rules, and related glossary terms.',
+  description: 'Gets comprehensive W3C context for a success criterion including technique counts, test rules, and links. For practical testing requirements, use get-useit-criteria-by-wcag; for Swedish DIGG testing methods, use get-digg-by-wcag.',
   inputSchema: {
     type: 'object',
     properties: {
