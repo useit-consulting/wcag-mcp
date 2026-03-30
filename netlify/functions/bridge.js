@@ -1,4 +1,5 @@
 import { tools } from '../../src/tools.js';
+import crypto from 'node:crypto';
 
 const CORS_HEADERS = {
   'Access-Control-Allow-Origin': '*',
@@ -79,12 +80,16 @@ function buildOpenApiSpec(baseUrl) {
  */
 function validateAuth(event) {
   const expected = process.env.BRIDGE_API_KEY;
-  if (!expected) return true;
+  if (!expected) return false;
   const auth = event.headers?.authorization || event.headers?.Authorization;
   const bearer = typeof auth === 'string' && auth.startsWith('Bearer ') ? auth.slice(7).trim() : '';
   const apiKey = event.headers?.['x-api-key'] || event.headers?.['X-Api-Key'] || '';
   const provided = bearer || apiKey;
-  return provided && provided === expected;
+  if (!provided) return false;
+  const a = Buffer.from(provided, 'utf8');
+  const b = Buffer.from(expected, 'utf8');
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(a, b);
 }
 
 /**
@@ -98,7 +103,10 @@ async function callMcpBackend(toolName, args, event) {
 
   const res = await fetch(mcpUrl, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.BRIDGE_API_KEY || ''}`,
+    },
     body: JSON.stringify({
       jsonrpc: '2.0',
       method: 'tools/call',
@@ -153,6 +161,13 @@ export const handler = async (event) => {
 
   // GET openapi.json
   if (event.httpMethod === 'GET' && (pathSegment === 'openapi.json' || path.endsWith('openapi.json'))) {
+    if (!validateAuth(event)) {
+      return {
+        statusCode: 401,
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ error: 'Missing or invalid API key' }),
+      };
+    }
     const host = event.headers?.host || event.headers?.Host;
     const protocol = event.headers?.['x-forwarded-proto'] === 'https' ? 'https' : 'https';
     const baseUrl = `${protocol}://${host}`;

@@ -1,4 +1,5 @@
 import { tools } from '../../src/tools.js';
+import crypto from 'node:crypto';
 
 /**
  * Stateless JSON-RPC handler for serverless environments
@@ -48,7 +49,8 @@ export const handler = async (event, context) => {
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Accept, Mcp-Session-Id',
+    'Access-Control-Allow-Headers':
+      'Content-Type, Accept, Authorization, x-api-key, Mcp-Session-Id',
   };
 
   // CORS preflight
@@ -56,8 +58,39 @@ export const handler = async (event, context) => {
     return { statusCode: 204, headers: corsHeaders, body: '' };
   }
 
+  function validateAuth() {
+    const expected = process.env.BRIDGE_API_KEY;
+    if (!expected) return false;
+
+    const auth = event.headers?.authorization || event.headers?.Authorization;
+    const bearer =
+      typeof auth === 'string' && auth.startsWith('Bearer ')
+        ? auth.slice(7).trim()
+        : '';
+    const apiKey =
+      event.headers?.['x-api-key'] || event.headers?.['X-Api-Key'] || '';
+    const provided = bearer || apiKey;
+    if (!provided) return false;
+
+    const a = Buffer.from(provided, 'utf8');
+    const b = Buffer.from(expected, 'utf8');
+    if (a.length !== b.length) return false;
+    return crypto.timingSafeEqual(a, b);
+  }
+
   // MCP JSON-RPC requests
   if (event.httpMethod === 'POST') {
+    if (!validateAuth()) {
+      return {
+        statusCode: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0', id: null,
+          error: { code: -32600, message: 'Missing or invalid API key' }
+        })
+      };
+    }
+
     try {
       const request = JSON.parse(event.body);
       
