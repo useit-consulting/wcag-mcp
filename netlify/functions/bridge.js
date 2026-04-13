@@ -99,7 +99,10 @@ async function callMcpBackend(toolName, args, event) {
   const host = event.headers?.host || event.headers?.Host;
   const url = process.env.URL || process.env.NETLIFY_URL || `https://${host}`;
   const base = url.replace(/\/$/, '');
-  const mcpUrl = `${base}/.netlify/functions/api`;
+  const secret = process.env.MCP_PATH_SECRET;
+  const mcpUrl = secret
+    ? `${base}/mcp/${encodeURIComponent(secret)}`
+    : `${base}/.netlify/functions/api`;
 
   const res = await fetch(mcpUrl, {
     method: 'POST',
